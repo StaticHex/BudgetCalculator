@@ -14,11 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 enum ArchiveMode { WEEKLY, BIWEEKLY, MONTHLY };
 
 public class TransactionManager {
+	private final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd-yyyy");
 	private ArrayList<Transaction> _transactions;
 	private ArrayList<Transaction> _recurring;
 	private boolean _round;
