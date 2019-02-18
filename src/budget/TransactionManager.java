@@ -20,8 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-enum ArchiveMode { WEEKLY, BIWEEKLY, MONTHLY };
-enum RoundingMode { NONE, SIMPLE, BANKERS, SPARE_CHANGE };
+// Enumerated types needed by the TransactionManager class for more information please refer to README.md
+enum ArchiveMode 	{ WEEKLY, BIWEEKLY, MONTHLY };
+enum RoundingMode 	{ NONE, SIMPLE, BANKERS, SPARE_CHANGE };
 
 public class TransactionManager {
 	// Private finals, right now just something for displaying our date formats
@@ -36,25 +37,45 @@ public class TransactionManager {
 	public 	ArrayList<Transaction> 	recurring;
 	
 	// Settings which are written out to file
-	private RoundingMode			_round;						// Used to hold rounding settings
-	private boolean					_showRounding;				// Round silently or show the effects of the rounding in the table
-	private ArchiveMode 			_archiveMode;				// Used to hold the period to show for the archive mode
-	private String 					_currentArchive;			// Used to hold the start date of the current archive
-	private Color					_buttonTextColor;			// Used to hold the color used for button and header text
-	private Color					_buttonBackgroundColor;		// Used to hold the color used for button and header backgrounds
-	private Color					_stageBackgroundColor;  	// Used to hold the color for the stage (diluted color)
-	private Color					_defaultTransactionColor;	// Used to hold the default color placed on transactions when created
+	private RoundingMode			_round;							   // Used to hold rounding settings
+	private boolean					_showRounding;					   // Round silently or show the effects of the rounding in the table
+	private ArchiveMode 			_archiveMode;					   // Used to hold the period to show for the archive mode
+	private String 					_currentArchive;				   // Used to hold the start date of the current archive
+	private Color					_buttonTextColor;				   // Used to hold the color used for button and header text
+	private Color					_buttonBackgroundColor;			   // Used to hold the color used for button and header backgrounds
+	private Color					_stageBackgroundColor;  		   // Used to hold the color for the stage (diluted color)
+	private Color					_defaultTransactionColor;		   // Used to hold the default color placed on transactions when created
+	private Color					_defaultTransactionColorUndiluted; // Used to hold the undiluted default transaction color
 	public TransactionManager() {
+		this.transactions 				= new ArrayList<Transaction>();
+		this.recurring 					= new ArrayList<Transaction>();
+		this.setRound					(RoundingMode.SIMPLE);
+		this.setShowRounding			(false);
+		this.setArchiveMode				(ArchiveMode.WEEKLY);
+		this.setCurrentArchive			("01-01-1970");
+		this.setButtonTextColor			(this._formatter.getSystemColor(SystemColor.WHITE));
+		this.setButtonBackgroundColor	(this._formatter.getSystemColor(SystemColor.DARK_BLUE));
+		this.setStageBackgroundColor	(this._formatter.getSystemColor(SystemColor.GREY));
+		this.setDefaultTransactionColor	(this._formatter.getSystemColor(SystemColor.GREY));
+	}
+	
+	public void newArchivePeriod(Date startDate) throws IOException {
+		// Convert date object to string
+		String stringStartDate = FORMAT.format(startDate);
+		
+		// Now call method which takes in string argument
+		this.newArchivePeriod(stringStartDate);
+	}
+	
+	public void newArchivePeriod(String startDate) throws IOException {
+		// Archive old list first
+		this.archive();
+		
+		// Set the new start date as the current archive
+		this._currentArchive = startDate;
+		
+		// Clear out old transactions (keep recurring)
 		this.transactions = new ArrayList<Transaction>();
-		this.recurring = new ArrayList<Transaction>();
-		this._round = RoundingMode.SIMPLE;
-		this._showRounding = false;
-		this._archiveMode = ArchiveMode.WEEKLY;
-		this._currentArchive = "01-01-1970";
-		this._buttonTextColor = _formatter.getSystemColor(SystemColor.WHITE);
-		this._buttonBackgroundColor = this._formatter.getSystemColor(SystemColor.DARK_BLUE);
-		this._stageBackgroundColor = this._formatter.getDiluteColor(SystemColor.GREY);
-		this._defaultTransactionColor = this._formatter.getDiluteColor(SystemColor.GREY);
 	}
 	
 	public void save() throws IOException {
@@ -118,10 +139,12 @@ public class TransactionManager {
 					}
 				}
 			}
-			
 			// Close the file after we're done
 			currentIn.close();
-		}	
+		} else {
+			this._currentArchive = FORMAT.format(new Date());
+			this.save();
+		}
 	}
 	
 	public void archive() throws IOException {
@@ -153,29 +176,114 @@ public class TransactionManager {
 		this.load();
 	}
 	
-	public String getPeriod() throws ParseException {
-		Date startDate = FORMAT.parse(this._currentArchive);
+	public String getArchivePeriodHeader() throws ParseException {
+		Date currentDate = FORMAT.parse(this._currentArchive);
+		String startDate ="";
+		String endDate = "";
 		Calendar dateAdder = Calendar.getInstance();
-		dateAdder.setTime(startDate);
-		String periodString = SFORMAT.format(startDate)+"-";
+		dateAdder.setTime(currentDate);
 		switch(this._archiveMode) {
 		case MONTHLY:
 			int day = 0;
 			String[] dateComponents;
+			dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+			day = Integer.parseInt(dateComponents[1]);
+			while(day != 1) {
+				dateAdder.add(Calendar.DATE, -1);
+				dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+				day = Integer.parseInt(dateComponents[1]);
+			}
+			startDate = SFORMAT.format(dateAdder.getTime());
+			dateAdder.add(Calendar.DATE, 1);
+			dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+			day = Integer.parseInt(dateComponents[1]);
 			while(day != 1) {
 				dateAdder.add(Calendar.DATE, 1);
 				dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
 				day = Integer.parseInt(dateComponents[1]);
 			}
-			return periodString+SFORMAT.format(dateAdder.getTime());
+			dateAdder.add(Calendar.DATE, -1);
+			endDate = SFORMAT.format(dateAdder.getTime());
+			return startDate+"-"+endDate;
 		case BIWEEKLY:
+			startDate = SFORMAT.format(currentDate)+"-";
 			dateAdder.add(Calendar.DATE, 13);
-			return periodString+SFORMAT.format(dateAdder.getTime());
+			return startDate+SFORMAT.format(dateAdder.getTime());
 		case WEEKLY:
 		default:
+			startDate = SFORMAT.format(currentDate)+"-";
 			dateAdder.add(Calendar.DATE, 6);
-			return periodString+SFORMAT.format(dateAdder.getTime());
+			return startDate+SFORMAT.format(dateAdder.getTime());
 		}
+	}
+	
+	public double applyRounding(Transaction t) {
+		switch(this._round) {
+		case SIMPLE:
+			return Math.round(t.getAmount());
+		case BANKERS:
+			int truncated = (int) (t.getAmount() * 10.0);
+			if (truncated % 10 == 5) {
+				if((truncated / 10) % 2 == 0) {
+					return Math.floor(t.getAmount());
+				} else {
+					return Math.ceil(t.getAmount());
+				}
+			}
+			return Math.round(t.getAmount());
+		case SPARE_CHANGE:
+			switch(t.getType()) {
+			case WITHDRAWAL:
+				return Math.ceil(t.getAmount());
+			case DEPOSIT:
+				return Math.floor(t.getAmount());
+			case REPORT:
+			default:
+				return Math.round(t.getAmount());
+			}
+		case NONE:
+		default:
+			return t.getAmount();
+		}
+	}
+	
+	public double sumTransactions() {
+		double sum = 0.0;
+		Iterator<Transaction> it = this.recurring.iterator();
+		
+		// Iterate over recurring transactions first
+		while(it.hasNext()) {
+			Transaction t = it.next();
+			switch(t.getType()) {
+			case WITHDRAWAL:
+				sum -= this.applyRounding(t);
+				break;
+			case DEPOSIT:
+				sum += this.applyRounding(t);
+				break;
+			case REPORT:
+			default:
+				break;
+			}
+		}
+		
+		// Now iterate over non-recurring transactions
+		it = this.transactions.iterator();
+		while(it.hasNext()) {
+			Transaction t = it.next();
+			switch(t.getType()) {
+			case WITHDRAWAL:
+				sum -= this.applyRounding(t);
+				break;
+			case DEPOSIT:
+				sum += this.applyRounding(t);
+				break;
+			case REPORT:
+			default:
+				break;
+			}
+		}
+		return sum;
 	}
 	
 	private void _unwrap(String settingString) {
@@ -190,6 +298,15 @@ public class TransactionManager {
 		this.setDefaultTransactionColor(settings[6]);
 	}
 	
+	private String displayDoubleAsCurrency(double amount) {
+		String prefix = "$";
+		if (amount < 0) {
+			prefix = "-"+prefix;
+			amount = Math.abs(amount);
+		}
+		return prefix+String.format("%.2f",amount);
+	}
+	
 	// Getters and setters past this point
 	public RoundingMode	getRound() 													{ return this._round; 										}
 	public boolean		getShowRounding()											{ return this._showRounding;								}
@@ -199,14 +316,13 @@ public class TransactionManager {
 	public Color		getButtonBackgroundColor()									{ return this._buttonBackgroundColor;						}
 	public Color		getStageBackgroundColor()									{ return this._stageBackgroundColor; 						}
 	public Color		getDefaultTransactionColor()								{ return this._defaultTransactionColor;						}
+	public Color		getDefaultTransactionColorUndiluted()						{ return this._defaultTransactionColorUndiluted; 			}
 	public void 		setRound(RoundingMode round)			 					{ this._round = round; 										}
 	public void			setShowRounding(boolean showRounding)						{ this._showRounding = showRounding;						}
 	public void 		setArchiveMode(ArchiveMode archiveMode) 					{ this._archiveMode = archiveMode; 							}
 	public void 		setCurrentArchive(String currentArchive)			 		{ this._currentArchive = currentArchive; 					}
 	public void			setButtonTextColor(Color buttonTextColor)					{ this._buttonTextColor = buttonTextColor;  				}
 	public void			setButtonBackgroundColor(Color buttonBackgroundColor)		{ this._buttonBackgroundColor = buttonBackgroundColor; 		}
-	public void 		setStageBackgroundColor(Color stageBackgroundColor)			{ this._stageBackgroundColor = stageBackgroundColor; 		}
-	public void			setDefaultTransactionColor(Color defaultTransactionColor)	{ this._defaultTransactionColor = defaultTransactionColor;	}
 	
 	// Specialized getters and setters here
 	public String getRoundAsString() {
@@ -285,8 +401,17 @@ public class TransactionManager {
 	public void setStageBackgroundColor(String stageBackgroundColor) {
 		this._stageBackgroundColor = this._formatter.getColorFromString(stageBackgroundColor);
 	}
-	
+	public void setStageBackgroundColor(Color stageBackgroundColor) { 
+		this._stageBackgroundColor = this._formatter.lightenColor(stageBackgroundColor, 3);
+	}
+
+	public void	 setDefaultTransactionColor(Color defaultTransactionColor) 
+	{ 
+		this._defaultTransactionColor = this._formatter.lightenColor(defaultTransactionColor, 3);
+		this._defaultTransactionColorUndiluted = defaultTransactionColor;
+	}
+
 	public void setDefaultTransactionColor(String defaultTransactionColor) {
-		this._defaultTransactionColor = this._formatter.getColorFromString(defaultTransactionColor);
+		this.setDefaultTransactionColor(this._formatter.getColorFromString(defaultTransactionColor));
 	}
 }

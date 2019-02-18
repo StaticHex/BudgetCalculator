@@ -120,9 +120,14 @@ public class Formatting {
 		}
 	}
 	
-	public Color getDiluteColor(SystemColor color) {
-		Color diffuse = this.getSystemColor(color);
-		return new Color((diffuse.getRed() + 255)/2, (diffuse.getGreen() + 255)/2, (diffuse.getBlue() + 255)/2);
+	public Color lightenColor(Color color, int power) {
+		return new Color((color.getRed() + power*255)/(power + 1), 
+						 (color.getGreen() + power*255)/(power + 1), 
+						 (color.getBlue() + power*255)/(power + 1));
+	}
+	
+	public Color lightenColor(SystemColor color, int power) {
+		return this.lightenColor(this.getSystemColor(color), power);
 	}
 	
 	public Color getColorFromString(String color) {
@@ -136,6 +141,15 @@ public class Formatting {
 		return Integer.toString(col.getRed())+","+
 				Integer.toString(col.getGreen())+","+
 				Integer.toString(col.getBlue());
+	}
+	
+	public Color detectTextColor(Color bg) {
+		int colorHash = bg.getRed() + bg.getGreen() + bg.getBlue();
+		int threshold = (64 * 3);
+		if (colorHash < threshold) {
+			return new Color(255, 255, 255);
+		}
+		return new Color(0, 0, 0);
 	}
 	
 	// Getters and setters past this point

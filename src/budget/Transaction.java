@@ -27,7 +27,7 @@ public class Transaction {
 		this._amount = 0.0;
 		this._recurring = false;
 		this._formatter = new Formatting();
-		this._transactionColor = this._formatter.getDiluteColor(SystemColor.GREY);
+		this._transactionColor = this._formatter.lightenColor(SystemColor.GREY,3);
 	}
 	
 	public Transaction(Transaction other) {
