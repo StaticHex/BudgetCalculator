@@ -186,20 +186,20 @@ public class TransactionManager {
 		case MONTHLY:
 			int day = 0;
 			String[] dateComponents;
-			dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+			dateComponents = this._formatter.splitString(SFORMAT.format(dateAdder.getTime()),'/');
 			day = Integer.parseInt(dateComponents[1]);
 			while(day != 1) {
 				dateAdder.add(Calendar.DATE, -1);
-				dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+				dateComponents = this._formatter.splitString(SFORMAT.format(dateAdder.getTime()),'/');
 				day = Integer.parseInt(dateComponents[1]);
 			}
 			startDate = SFORMAT.format(dateAdder.getTime());
 			dateAdder.add(Calendar.DATE, 1);
-			dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+			dateComponents = this._formatter.splitString(SFORMAT.format(dateAdder.getTime()),'/');
 			day = Integer.parseInt(dateComponents[1]);
 			while(day != 1) {
 				dateAdder.add(Calendar.DATE, 1);
-				dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+				dateComponents = this._formatter.splitString(SFORMAT.format(dateAdder.getTime()),'/');
 				day = Integer.parseInt(dateComponents[1]);
 			}
 			dateAdder.add(Calendar.DATE, -1);
@@ -287,7 +287,8 @@ public class TransactionManager {
 	}
 	
 	private void _unwrap(String settingString) {
-		String[] settings = settingString.split("|");
+		settingString = settingString.trim();
+		String[] settings = this._formatter.splitString(settingString, '|');
 		this.setRound(settings[0]);
 		this.setShowRounding(settings[1]);
 		this.setArchiveMode(settings[2]);
@@ -295,7 +296,7 @@ public class TransactionManager {
 		this.setButtonTextColor(settings[4]);
 		this.setButtonBackgroundColor(settings[5]);
 		this.setStageBackgroundColor(settings[6]);
-		this.setDefaultTransactionColor(settings[6]);
+		this.setDefaultTransactionColor(settings[7]);
 	}
 	
 	private String displayDoubleAsCurrency(double amount) {

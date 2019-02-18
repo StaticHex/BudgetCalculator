@@ -1,6 +1,7 @@
 package budget;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 enum Alignment { LEFT, CENTER, RIGHT };
 enum PadMode { WIDTH, NUMBER };
@@ -131,7 +132,7 @@ public class Formatting {
 	}
 	
 	public Color getColorFromString(String color) {
-		String[] components = color.split(",");
+		String[] components = this.splitString(color, ',');
 		return new Color(Integer.parseInt(components[0]),
 						 Integer.parseInt(components[1]),
 						 Integer.parseInt(components[2]));
@@ -150,6 +151,23 @@ public class Formatting {
 			return new Color(255, 255, 255);
 		}
 		return new Color(0, 0, 0);
+	}
+	
+	public String[] splitString(String stringToSplit, char delimiter) {
+		ArrayList<String> components = new ArrayList<String>();
+		String comp = "";
+		for (int i = 0; i < stringToSplit.length(); i++) {
+			if (stringToSplit.charAt(i) == delimiter) {
+				components.add(comp);
+				comp = "";
+			} else {
+				comp += stringToSplit.charAt(i);
+			}
+		}
+		components.add(comp);
+		String[] componentArray = new String[components.size()];
+		componentArray = components.toArray(componentArray);
+		return componentArray;
 	}
 	
 	// Getters and setters past this point

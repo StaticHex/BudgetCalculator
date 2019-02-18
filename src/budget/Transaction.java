@@ -100,7 +100,7 @@ public class Transaction {
 	}
 	
 	public Transaction unwrap(String transaction) {
-		String[] properties = transaction.split("|");
+		String[] properties = this._formatter.splitString(transaction, '|');
 		return new Transaction(properties[0],
 							   properties[1],
 							   this._getTypeFromString(properties[2]),
