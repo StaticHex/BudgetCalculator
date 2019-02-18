@@ -14,7 +14,7 @@ This project implments a very simple budget tracker with the ability to create a
 
 ### Menu Options: 
 
-* + -- Adds a new transaction to the list. Brings up the add transaction window (see add transactions section below for more information).
+* (+) -- Adds a new transaction to the list. Brings up the add transaction window (see add transactions section below for more information).
 * 🗋 -- Creates a new transaction list. Archives the old list and then allows the user to set a start date for the new list. The end date is selected automatically based on the user's settings (see settings section below for more information).
 * 📂 -- Loads a previously saved transaction list.
 * 💾 -- Saves the current transaction list
@@ -31,10 +31,10 @@ This project implments a very simple budget tracker with the ability to create a
 ### Settings options
 
 * Rounding - Currently 3 types of rounding are supported:
-..* Simple - Round everything to the closest decimal place
-..* Conservative - Round withdrawals up to the nearest dollar and round deposits down to the nearest dollar
-..* Spare Change - Round withdrawals up to the nearest dollar, round deposits down to the nearest dollar, round Total remaining down to the nearest $5
+  * Simple - Round everything to the closest decimal place
+  * Conservative - Round withdrawals up to the nearest dollar and round deposits down to the nearest dollar
+  * Spare Change - Round withdrawals up to the nearest dollar, round deposits down to the nearest dollar, round Total remaining down to the nearest $5
 * Time Period - Currently 3 time periods are supported and the time periods apply globally. Currently there is no way to make some transactions apply under one time period and have others apply on another (though this may change in the future).
-..* Weekly - 7 day period based on the start date.
-..* Bi-Weekly - 13 day period based on the start date.
-..* Monthly - Finds the first and last day of the month that the chosen start date resides in and creates a period based on that. 
+  * Weekly - 7 day period based on the start date.
+  * Bi-Weekly - 13 day period based on the start date.
+  * Monthly - Finds the first and last day of the month that the chosen start date resides in and creates a period based on that. 
