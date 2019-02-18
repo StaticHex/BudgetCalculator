@@ -48,17 +48,35 @@ public class BudgetCalculator extends Application {
         final BorderPane contentPane = new BorderPane(scroller,buttonPane,null,balancePane,null);
         				 contentPane.setPadding(new Insets(10,10,10,10));
         
-        // Set up option Buttons to add a transaction
-        final HBox optionBox = new HBox();
+        // Set up option Buttons to add a transaction      		   
         final AnchorPane optionPane = new AnchorPane();
+		  				 optionPane.setMaxWidth(Double.MAX_VALUE);
         Button addButton = new Button("+");
         	   addButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Button saveButton = new Button("💾");
+        	   saveButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Button loadButton = new Button("📂");
+               loadButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Button newButton = new Button("🗋");
+        	   newButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        Button settingsButton = new Button("🛠");
+        	   settingsButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
         AnchorPane.setLeftAnchor(addButton, 10.0);
         AnchorPane.setBottomAnchor(addButton, 10.0);
         AnchorPane.setTopAnchor(addButton, 10.0);
-        optionPane.getChildren().add(addButton);
-        optionBox.getChildren().add(optionPane);
-        
+        AnchorPane.setRightAnchor(settingsButton, 10.0);
+        AnchorPane.setBottomAnchor(settingsButton, 10.0);
+        AnchorPane.setTopAnchor(settingsButton, 10.0);
+        AnchorPane.setRightAnchor(saveButton, 65.0);
+        AnchorPane.setBottomAnchor(saveButton, 10.0);
+        AnchorPane.setTopAnchor(saveButton, 10.0);
+        AnchorPane.setRightAnchor(loadButton, 120.0);
+        AnchorPane.setBottomAnchor(loadButton, 10.0);
+        AnchorPane.setTopAnchor(loadButton, 10.0);
+        AnchorPane.setRightAnchor(newButton, 175.0);
+        AnchorPane.setBottomAnchor(newButton, 10.0);
+        AnchorPane.setTopAnchor(newButton, 10.0);
+        optionPane.getChildren().addAll(addButton, settingsButton, saveButton, loadButton, newButton); 
         
         addButton.setOnAction(new EventHandler<ActionEvent>() {
         	@Override
@@ -105,7 +123,7 @@ public class BudgetCalculator extends Application {
         });
 
         // Set up our scene and then show
-        Scene scene = new Scene(new BorderPane(contentPane, null, null, optionBox, null), 800, 600);
+        Scene scene = new Scene(new BorderPane(contentPane, null, null, optionPane, null), 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

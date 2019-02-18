@@ -11,25 +11,34 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import java.util.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 enum ArchiveMode { WEEKLY, BIWEEKLY, MONTHLY };
 
 public class TransactionManager {
+	// Private finals, right now just something for displaying our date formats
 	private final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd-yyyy");
-	private ArrayList<Transaction> _transactions;
-	private ArrayList<Transaction> _recurring;
+	private final SimpleDateFormat SFORMAT = new SimpleDateFormat("MM/dd/yyyy");
+	
+	// It would honestly be more trouble than it's worth to create getters and setters for our transaction lists and so
+	// instead we just expose these so we can access them directly from outside the class using the ArrayList classes
+	// methods
+	public ArrayList<Transaction> transactions;
+	public ArrayList<Transaction> recurring;
+	
 	private boolean _round;
 	private ArchiveMode _archiveMode;
 	private String _currentArchive;
 	
 	public TransactionManager() {
-		this._transactions = new ArrayList<Transaction>();
-		this._recurring = new ArrayList<Transaction>();
+		this.transactions = new ArrayList<Transaction>();
+		this.recurring = new ArrayList<Transaction>();
 		this._round = true;
 		this._currentArchive = "01-01-1970";
 		this._archiveMode = ArchiveMode.WEEKLY;
@@ -56,14 +65,14 @@ public class TransactionManager {
 			settingsOut.close();
 			
 			// Write transactions to archive file
-			Iterator it = this._transactions.iterator();
+			Iterator<Transaction> it = this.transactions.iterator();
 			while(it.hasNext()) {
 				archiveOut.write(((Transaction) it.next()).export()+"\n");
 			}
 			archiveOut.close();
 			
 			// Write recurring transactions to archive file
-			it = this._recurring.iterator();
+			it = this.recurring.iterator();
 			while(it.hasNext()) {
 				recurringOut.write(((Transaction) it.next()).export()+"\n");
 			}
@@ -100,73 +109,75 @@ public class TransactionManager {
 	
 	}
 	
-	public void load() {
+	public void load() throws IOException {
 		File archiveFile = new File("./archives/"+this._currentArchive);
-		File settingsFile = new File("./settings.txt");
 		File recurringFile = new File("./recurring.txt");
-		try {
-			// Read in and parse settings file
-			String line;
-			if(settingsFile.exists()) {
-				BufferedReader settingsIn = new BufferedReader(
-						new InputStreamReader(new FileInputStream(settingsFile), "UTF-8"));
-				while ((line = settingsIn.readLine()) != null) {
-					if(line.contains("|")) {
-						this._unwrap(line);
-					}
+
+		String line;
+		// Read in and parse archive file
+		if(archiveFile.exists()) {
+			BufferedReader archiveIn = new BufferedReader(
+					new InputStreamReader(new FileInputStream(archiveFile), "UTF-8")); 
+			while((line = archiveIn.readLine()) != null) {
+				if(line.contains("|")) {
+					this.transactions.add(new Transaction(line));
 				}
-				settingsIn.close();
 			}
-			// Read in and parse archive file
-			if(archiveFile.exists()) {
-				BufferedReader archiveIn = new BufferedReader(
-						new InputStreamReader(new FileInputStream(archiveFile), "UTF-8")); 
-				while((line = archiveIn.readLine()) != null) {
-					if(line.contains("|")) {
-						this._transactions.add(new Transaction(line));
-					}
-				}
-				archiveIn.close();
-			}
+			archiveIn.close();
+		}
 			
-			// Read in and parse recurring file
-			if(recurringFile.exists()) {
-				BufferedReader recurringIn = new BufferedReader(
-						new InputStreamReader(new FileInputStream(recurringFile), "UTF-8")); 
-				while((line = recurringIn.readLine()) != null) {
-					if(line.contains("|")) {
-						this._recurring.add(new Transaction(line));
-					}
+		// Read in and parse recurring file
+		if(recurringFile.exists()) {
+			BufferedReader recurringIn = new BufferedReader(
+					new InputStreamReader(new FileInputStream(recurringFile), "UTF-8")); 
+			while((line = recurringIn.readLine()) != null) {
+				if(line.contains("|")) {
+					this.recurring.add(new Transaction(line));
 				}
-				recurringIn.close();
 			}
-		} catch (FileNotFoundException e) {
-			// Print alert if we can't create the file
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Something went wrong!");
-			alert.setHeaderText("File was not found and could not create it, check permissions.");
-			alert.setContentText(e.getStackTrace().toString());
-			alert.showAndWait().ifPresent(rs -> {
-				System.exit(1);
-			});
-		} catch (UnsupportedEncodingException e) {
-			// Print alert if we run into trouble parsing UTF-8
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Something went wrong!");
-			alert.setHeaderText("Check to ensure unicode is supported on your system.");
-			alert.setContentText(e.getStackTrace().toString());
-			alert.showAndWait().ifPresent(rs -> {
-				System.exit(1);
-			});
-		} catch (IOException e) {
-			// Print alert if we run into trouble reading file
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Something went wrong!");
-			alert.setHeaderText("An error occured while writing to file, check permissions and disk space and try again.");
-			alert.setContentText(e.getStackTrace().toString());
-			alert.showAndWait().ifPresent(rs -> {
-				System.exit(1);
-			});
+			recurringIn.close();
+		}		
+	}
+	
+	public void loadCurrent() throws IOException {
+		File settingsFile = new File("./settings.txt");
+		// Read in and parse settings file
+		String line;
+		if(settingsFile.exists()) {
+			BufferedReader settingsIn = new BufferedReader(
+					new InputStreamReader(new FileInputStream(settingsFile), "UTF-8"));
+			while ((line = settingsIn.readLine()) != null) {
+				if(line.contains("|")) {
+					this._unwrap(line);
+				}
+			}
+			settingsIn.close();
+		}
+		this.load();
+	}
+	
+	public String getArchivePeriod() throws ParseException {
+		Date startDate = FORMAT.parse(this._currentArchive);
+		Calendar dateAdder = Calendar.getInstance();
+		dateAdder.setTime(startDate);
+		String periodString = SFORMAT.format(startDate)+"-";
+		switch(this._archiveMode) {
+		case MONTHLY:
+			int day = 0;
+			String[] dateComponents;
+			while(day != 1) {
+				dateAdder.add(Calendar.DATE, 1);
+				dateComponents = SFORMAT.format(dateAdder.getTime()).split("/");
+				day = Integer.parseInt(dateComponents[1]);
+			}
+			return periodString+SFORMAT.format(dateAdder.getTime());
+		case BIWEEKLY:
+			dateAdder.add(Calendar.DATE, 13);
+			return periodString+SFORMAT.format(dateAdder.getTime());
+		case WEEKLY:
+		default:
+			dateAdder.add(Calendar.DATE, 6);
+			return periodString+SFORMAT.format(dateAdder.getTime());
 		}
 	}
 	
