@@ -11,22 +11,23 @@ enum TransactionType { WITHDRAWAL, DEPOSIT, REPORT };
 public class Transaction {
 	private final SimpleDateFormat FORMAT = new SimpleDateFormat("MM/dd/yyyy");
 	private final SimpleDateFormat FILE_FORMAT = new SimpleDateFormat("MM-dd-yyyy");
+	private final int len = 80;
 	private Date _date;
 	private String _name;
 	private TransactionType _type;
 	private double _amount;
 	private boolean _recurring;
-	private Formatting _settings;
+	private Formatting _formatter;
 	private Color _transactionColor;
 	
 	public Transaction() {
 		this._date = new Date(0);
-		this._name = this._settings.pad("Empty Transaction", 64);
+		this._name = this._formatter.pad("Empty Transaction", len);
 		this._type = TransactionType.REPORT;
 		this._amount = 0.0;
 		this._recurring = false;
-		this._settings = new Formatting();
-		this._transactionColor = new Color(237,237,237);
+		this._formatter = new Formatting();
+		this._transactionColor = this._formatter.getDiluteColor(SystemColor.GREY);
 	}
 	
 	public Transaction(Transaction other) {
@@ -35,7 +36,7 @@ public class Transaction {
 		this._type = other._type;
 		this._amount = other._amount;
 		this._recurring = other._recurring;
-		this._settings = other._settings;
+		this._formatter = other._formatter;
 		this._transactionColor = other._transactionColor;
 	}
 	
@@ -46,18 +47,18 @@ public class Transaction {
 		this._type = other._type;
 		this._amount = other._amount;
 		this._recurring = other._recurring;
-		this._settings = other._settings;
+		this._formatter = other._formatter;
 		this._transactionColor = other._transactionColor;
 	}
 	
 	public Transaction(long date, String name, TransactionType type, double amount, boolean recurring, Color transactionColor) {
 		this._date = new Date(date);
-		this._name = this._settings.pad(this._settings.truncate(name, 64), 64);
+		this._name = this._formatter.pad(this._formatter.truncate(name, len), len);
 		this._type = type;
 		this._amount = amount;
 		this._recurring = recurring;
-		this._settings = new Formatting();
-		this._settings = new Formatting();
+		this._formatter = new Formatting();
+		this._formatter = new Formatting();
 		this._transactionColor = transactionColor;
 	}
 	
@@ -79,12 +80,12 @@ public class Transaction {
 				e2.printStackTrace();
 			}
 		}
-		this._name = this._settings.pad(this._settings.truncate(name, 64), 64);
+		this._name = this._formatter.pad(this._formatter.truncate(name, len), len);
 		this._type = type;
 		this._amount = amount;
 		this._recurring = recurring;
-		this._settings = new Formatting();
-		this._settings = new Formatting();
+		this._formatter = new Formatting();
+		this._formatter = new Formatting();
 		this._transactionColor = transactionColor;
 	}
 	
@@ -105,16 +106,16 @@ public class Transaction {
 							   this._getTypeFromString(properties[2]),
 							   Double.parseDouble(properties[3]),
 							   this._getRecurringFromString(properties[4]),
-							   this._getColorFromString(properties[5]));
+							   this._formatter.getColorFromString(properties[5]));
 	}
 	
 	public String toString() {
-		String transaction = this._settings.pad(this.getDate(), 14);
-			   transaction+= this._settings.pad(this._settings.truncate(this._name, 39), 39);
-			   transaction+= this._settings.pad(this.getTypeAsString(), 3);
-			   transaction+= this._settings.pad(this.getAmountAsString(), 10);
-			   transaction+= this._settings.pad(this.getRecurringAsString(), 3);
-			   transaction+= this._settings.pad(this.getTransactionColorAsString(), 11);
+		String transaction = this._formatter.pad(this.getDate(), 14);
+			   transaction+= this._formatter.pad(this._formatter.truncate(this._name, 39), 39);
+			   transaction+= this._formatter.pad(this.getTypeAsString(), 3);
+			   transaction+= this._formatter.pad(this.getAmountAsString(), 10);
+			   transaction+= this._formatter.pad(this.getRecurringAsString(), 3);
+			   transaction+= this._formatter.pad(this.getTransactionColorAsString(), 11);
 		return transaction;
 	}
 	
@@ -134,13 +135,6 @@ public class Transaction {
 		} else {
 			return false;
 		}
-	}
-	
-	private Color _getColorFromString(String color) {
-		String[] components = color.split(",");
-		return new Color(Integer.parseInt(components[0]),
-						 Integer.parseInt(components[1]),
-						 Integer.parseInt(components[2]));
 	}
 	
 	// Getters and setters past this point
@@ -181,9 +175,7 @@ public class Transaction {
 	}
 	
 	public String getTransactionColorAsString() {
-		return Integer.toString(this._transactionColor.getRed())+","+
-				Integer.toString(this._transactionColor.getGreen())+","+
-				Integer.toString(this._transactionColor.getBlue());
+		return this._formatter.getColorAsString(this._transactionColor);
 	}
 	
 	public void setType(String type) {
@@ -195,6 +187,6 @@ public class Transaction {
 	}
 	
 	public void setTransactionColor(String transactionColor) {
-		this._transactionColor = this._getColorFromString(transactionColor);
+		this._transactionColor = this._formatter.getColorFromString(transactionColor);
 	}
 }
