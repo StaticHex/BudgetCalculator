@@ -30,11 +30,19 @@ This project implments a very simple budget tracker with the ability to create a
 
 ### Settings options
 
-* Rounding - Currently 3 types of rounding are supported:
+* Rounding - Currently 4 types of rounding are supported:
+  * None - Nothing is rounded, use this if you want to track exact amounts.
   * Simple - Round everything to the closest decimal place
-  * Conservative - Round withdrawals up to the nearest dollar and round deposits down to the nearest dollar
+  * Banker's - In the event that the amount to round is equidistant from two values i.e. 0.5 the value is rounded to the nearest even integer. See http://wiki.c2.com/?BankersRounding for more information.
   * Spare Change - Round withdrawals up to the nearest dollar, round deposits down to the nearest dollar, round Total remaining down to the nearest $5
-* Time Period - Currently 3 time periods are supported and the time periods apply globally. Currently there is no way to make some transactions apply under one time period and have others apply on another (though this may change in the future).
+* Show Rounding - Provides the option to round silently, meaning values are rounded when calculating the remaining total but exact amounts are shown on each transaction.
+* Archive Mode - Currently 3 modes are supported and the time periods apply globally. Currently there is no way to make some transactions apply under one mode and have others apply on another (though this may change in the future).
   * Weekly - 7 day period based on the start date.
   * Bi-Weekly - 13 day period based on the start date.
-  * Monthly - Finds the first and last day of the month that the chosen start date resides in and creates a period based on that. 
+  * Monthly - Finds the first and last day of the month that the chosen start date resides in and creates a period based on that.
+* Color Options:
+  * Button Text Color - Changes the text color on all buttons and title bars.
+  * Button Background Color - Changes the background color on all buttons and title bars
+  * Stage Background Color - Changes the backtround color of the main window; applies dilute coloring i.e. it averages the color with white before applying so that the color is lighter.
+  * Default Transaction Color - This is the color that transactions will default to if no color is assigned to them. Applies dilue coloring i.e. it averages the color with white before applying so that the color is lighter.
+ 
