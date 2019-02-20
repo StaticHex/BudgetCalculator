@@ -238,6 +238,7 @@ public class TransactionManager {
 			case DEPOSIT:
 				return Math.floor(t.getAmount());
 			case REPORT:
+				return t.getAmount();
 			default:
 				return Math.round(t.getAmount());
 			}
@@ -262,6 +263,8 @@ public class TransactionManager {
 				sum += this.applyRounding(t);
 				break;
 			case REPORT:
+				sum = t.getAmount();
+				break;
 			default:
 				break;
 			}
@@ -279,6 +282,8 @@ public class TransactionManager {
 				sum += this.applyRounding(t);
 				break;
 			case REPORT:
+				sum = t.getAmount();
+				break;
 			default:
 				break;
 			}

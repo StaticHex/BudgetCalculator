@@ -3,7 +3,6 @@ import java.awt.Color;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Random;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,16 +11,22 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.util.Pair;
 
 public class BudgetCalculator extends Application {
 	private final TransactionManager _manager 	= new TransactionManager();
@@ -95,7 +100,31 @@ public class BudgetCalculator extends Application {
         		   addButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
         				   								  this._manager.getButtonBackgroundColor()));
         	   });
+        	   addButton.setOnMouseReleased(e -> {
+        		   addButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+						  	  this._formatter.lightenColor(
+						  			this._manager.getButtonBackgroundColor(), 1
+						  	  )));        		   
+        	   });
+        	   addButton.setOnMousePressed(e-> {
+        		   addButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+							  this._manager.getButtonBackgroundColor()));
+        	   });
                addButton.setOnAction(e -> {
+                   Dialog<Pair<String, String>> addTransactionDialog = new Dialog<>();
+                   addTransactionDialog.setTitle("New Transaction");
+                   addTransactionDialog.setHeaderText("Enter the information for your transaction below.");
+                   Image dialogGraphic = new Image("file:./assets/add.png");
+                   ImageView dialogView = new ImageView(dialogGraphic);
+                   			 dialogView.setFitHeight(64);
+                   			 dialogView.setFitWidth(64);
+                   addTransactionDialog.setGraphic(dialogView);
+
+                    ButtonType addButtonType = new ButtonType("Add", ButtonData.OK_DONE);
+                    addTransactionDialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+                    addTransactionDialog.showAndWait();
+            	    /*
        	            final AnchorPane anchorPane = new AnchorPane();
        	            anchorPane.setStyle(this.getStyleString(this._formatter.getSystemColor(SystemColor.BLACK),
        	            										this._manager.getDefaultTransactionColor()
@@ -164,6 +193,7 @@ public class BudgetCalculator extends Application {
        	            	   AnchorPane.setBottomAnchor(removeButton, 5.0);
        	            	   anchorPane.getChildren().addAll(label, editButton, removeButton);
        	            	   content.getChildren().add(anchorPane);
+       	            	   */
                 });
         
         // Format Save button and add event listeners
@@ -182,6 +212,17 @@ public class BudgetCalculator extends Application {
         				   this._manager.getButtonBackgroundColor())
         		   );
         	   });
+        	   saveButton.setOnMousePressed(e-> {
+        		   saveButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+        				   this._manager.getButtonBackgroundColor())
+        		   );   		   
+        	   });
+        	   saveButton.setOnMouseReleased(e-> {
+        		   saveButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+        				   this._formatter.lightenColor(
+        						   this._manager.getButtonBackgroundColor(), 1)
+        			));
+        	   });
         
         // Format load button and add event listeners
         Button loadButton = new Button("📂");
@@ -197,6 +238,16 @@ public class BudgetCalculator extends Application {
                loadButton.setOnMouseExited(e -> {
             	   loadButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
 							  this._manager.getButtonBackgroundColor()));
+               });
+               loadButton.setOnMousePressed(e->{
+            	   loadButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+							  this._manager.getButtonBackgroundColor()));            	   
+               });
+               loadButton.setOnMouseReleased(e->{
+            	   loadButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+						  	  this._formatter.lightenColor(
+						  			this._manager.getButtonBackgroundColor(), 1
+						  	  )));            	   
                });
                
         // Format New button and add event listeners
@@ -214,6 +265,16 @@ public class BudgetCalculator extends Application {
         		   newButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
 							  this._manager.getButtonBackgroundColor()));
         	   });
+        	   newButton.setOnMousePressed(e-> {
+        		   newButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+							  this._manager.getButtonBackgroundColor()));        		   
+        	   });
+        	   newButton.setOnMouseReleased(e-> {
+        		   newButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+						  	  this._formatter.lightenColor(
+						  			this._manager.getButtonBackgroundColor(), 1
+						  	  )));        		   
+        	   });
         	   
         // Format Settings button and add event listeners
         Button settingsButton = new Button("🛠");
@@ -229,6 +290,16 @@ public class BudgetCalculator extends Application {
         	   settingsButton.setOnMouseExited(e -> {
         		   settingsButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
 							  this._manager.getButtonBackgroundColor()));
+        	   });
+        	   settingsButton.setOnMousePressed(e->{
+        		   settingsButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+							  this._manager.getButtonBackgroundColor()));        		   
+        	   });
+        	   settingsButton.setOnMouseReleased(e->{
+        		   settingsButton.setStyle(this.getButtonStyle(this._manager.getButtonTextColor(), 
+						  	  this._formatter.lightenColor(
+						  			this._manager.getButtonBackgroundColor(), 1
+						  	  )));        		   
         	   });
         	   
         // Set up menu pane for option buttons     		   
